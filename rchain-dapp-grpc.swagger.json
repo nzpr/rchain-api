@@ -1,0 +1,1345 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "rchain-dapp-grpc.proto",
+    "version": "version not set"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v0.9.7/continuationatname": {
+      "put": {
+        "summary": "Find processes receiving on a name.\nReturns on success ListeningNameContinuationResponse",
+        "operationId": "listenForContinuationAtName",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protocolListeningNameContinuationResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protocolContinuationAtNameQuery"
+            }
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/dataatname": {
+      "put": {
+        "summary": "Find data sent to a name.\nReturns on success ListeningNameDataResponse",
+        "operationId": "listenForDataAtName",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protocolListeningNameDataResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protocolDataAtNameQuery"
+            }
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/dodeploy": {
+      "put": {
+        "summary": "Queue deployment of Rholang code (or fail to parse).\nReturns on success DeployServiceResponse",
+        "operationId": "DoDeploy",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protocolDeployServiceResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/protocolDeployData"
+            }
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/getblock/{hash}": {
+      "get": {
+        "summary": "Get details about a particular block.\nReturns on success BlockQueryResponse",
+        "operationId": "getBlock",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protocolBlockQueryResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/getblocks/{depth}": {
+      "get": {
+        "summary": "Get a summary of blocks on the blockchain.\nReturns on success LightBlockInfo",
+        "operationId": "getBlocks",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "$ref": "#/x-stream-definitions/protocolLightBlockInfo"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "depth",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/getblockwithdeploy/{user}/{timestamp}": {
+      "get": {
+        "summary": "Find block from a deploy.\nReturns on success BlockQueryResponse",
+        "operationId": "findBlockWithDeploy",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protocolBlockQueryResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "byte"
+          },
+          {
+            "name": "timestamp",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/getdeploy/{deployId}": {
+      "get": {
+        "summary": "Find block containing a deploy.\nReturns on success LightBlockQueryResponse",
+        "operationId": "findDeploy",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protocolLightBlockQueryResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deployId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "byte"
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/getfinalizedblock": {
+      "get": {
+        "summary": "Get details about a particular block.\nReturns on success BlockQueryResponse",
+        "operationId": "lastFinalizedBlock",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/protocolBlockQueryResponse"
+            }
+          }
+        },
+        "tags": [
+          "DeployService"
+        ]
+      }
+    },
+    "/v0.9.7/showmainchain/{depth}": {
+      "get": {
+        "summary": "Returns on success LightBlockInfo.",
+        "operationId": "showMainChain",
+        "responses": {
+          "200": {
+            "description": "A successful response.(streaming responses)",
+            "schema": {
+              "$ref": "#/x-stream-definitions/protocolLightBlockInfo"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "depth",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "DeployService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "BindPattern": {
+      "type": "object",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "remainder": {
+          "$ref": "#/definitions/Var"
+        },
+        "freeCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "Bundle": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "$ref": "#/definitions/Par"
+        },
+        "writeFlag": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "readFlag": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "*\nNothing can be received from a (quoted) bundle with `readFlag = false`.\nLikeise nothing can be sent to a (quoted) bundle with `writeFlag = false`.\n\nIf both flags are set to false, bundle allows only for equivalance check."
+    },
+    "Connective": {
+      "type": "object",
+      "properties": {
+        "conn_and_body": {
+          "$ref": "#/definitions/ConnectiveBody"
+        },
+        "conn_or_body": {
+          "$ref": "#/definitions/ConnectiveBody"
+        },
+        "conn_not_body": {
+          "$ref": "#/definitions/Par"
+        },
+        "var_ref_body": {
+          "$ref": "#/definitions/VarRef"
+        },
+        "conn_bool": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "conn_int": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "conn_string": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "conn_uri": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "conn_byte_array": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "ConnectiveBody": {
+      "type": "object",
+      "properties": {
+        "ps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        }
+      }
+    },
+    "EAnd": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EDiv": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EEq": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EGt": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EGte": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EList": {
+      "type": "object",
+      "properties": {
+        "ps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "remainder": {
+          "$ref": "#/definitions/Var"
+        }
+      }
+    },
+    "ELt": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "ELte": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EMap": {
+      "type": "object",
+      "properties": {
+        "kvs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/KeyValuePair"
+          }
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "remainder": {
+          "$ref": "#/definitions/Var"
+        }
+      }
+    },
+    "EMatches": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "$ref": "#/definitions/Par"
+        },
+        "pattern": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EMethod": {
+      "type": "object",
+      "properties": {
+        "methodName": {
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/definitions/Par"
+        },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "*\n`target.method(arguments)`"
+    },
+    "EMinus": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EMinusMinus": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      },
+      "title": "Set difference"
+    },
+    "EMult": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "ENeg": {
+      "type": "object",
+      "properties": {
+        "p": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "ENeq": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "ENot": {
+      "type": "object",
+      "properties": {
+        "p": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EOr": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EPercentPercent": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      },
+      "description": "`\"Hello, {name}\" %% {\"name\": \"Bob\"}` denotes `\"Hello, Bob\"`",
+      "title": "*\nString interpolation"
+    },
+    "EPlus": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "EPlusPlus": {
+      "type": "object",
+      "properties": {
+        "p1": {
+          "$ref": "#/definitions/Par"
+        },
+        "p2": {
+          "$ref": "#/definitions/Par"
+        }
+      },
+      "title": "Concatenation"
+    },
+    "ESet": {
+      "type": "object",
+      "properties": {
+        "ps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "remainder": {
+          "$ref": "#/definitions/Var"
+        }
+      }
+    },
+    "ETuple": {
+      "type": "object",
+      "properties": {
+        "ps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "EVar": {
+      "type": "object",
+      "properties": {
+        "v": {
+          "$ref": "#/definitions/Var"
+        }
+      },
+      "description": "A variable used as a var should be bound in a process context, not a name\ncontext. For example:\n`for (@x \u003c- c1; @y \u003c- c2) { z!(x + y) }` is fine, but\n`for (x \u003c- c1; y \u003c- c2) { z!(x + y) }` should raise an error."
+    },
+    "Expr": {
+      "type": "object",
+      "properties": {
+        "g_bool": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "g_int": {
+          "type": "string",
+          "format": "int64"
+        },
+        "g_string": {
+          "type": "string"
+        },
+        "g_uri": {
+          "type": "string"
+        },
+        "g_byte_array": {
+          "type": "string",
+          "format": "byte"
+        },
+        "e_not_body": {
+          "$ref": "#/definitions/ENot"
+        },
+        "e_neg_body": {
+          "$ref": "#/definitions/ENeg"
+        },
+        "e_mult_body": {
+          "$ref": "#/definitions/EMult"
+        },
+        "e_div_body": {
+          "$ref": "#/definitions/EDiv"
+        },
+        "e_plus_body": {
+          "$ref": "#/definitions/EPlus"
+        },
+        "e_minus_body": {
+          "$ref": "#/definitions/EMinus"
+        },
+        "e_lt_body": {
+          "$ref": "#/definitions/ELt"
+        },
+        "e_lte_body": {
+          "$ref": "#/definitions/ELte"
+        },
+        "e_gt_body": {
+          "$ref": "#/definitions/EGt"
+        },
+        "e_gte_body": {
+          "$ref": "#/definitions/EGte"
+        },
+        "e_eq_body": {
+          "$ref": "#/definitions/EEq"
+        },
+        "e_neq_body": {
+          "$ref": "#/definitions/ENeq"
+        },
+        "e_and_body": {
+          "$ref": "#/definitions/EAnd"
+        },
+        "e_or_body": {
+          "$ref": "#/definitions/EOr"
+        },
+        "e_var_body": {
+          "$ref": "#/definitions/EVar"
+        },
+        "e_list_body": {
+          "$ref": "#/definitions/EList"
+        },
+        "e_tuple_body": {
+          "$ref": "#/definitions/ETuple"
+        },
+        "e_set_body": {
+          "$ref": "#/definitions/ESet"
+        },
+        "e_map_body": {
+          "$ref": "#/definitions/EMap"
+        },
+        "e_method_body": {
+          "$ref": "#/definitions/EMethod"
+        },
+        "e_matches_body": {
+          "$ref": "#/definitions/EMatches"
+        },
+        "e_percent_percent_body": {
+          "$ref": "#/definitions/EPercentPercent"
+        },
+        "e_plus_plus_body": {
+          "$ref": "#/definitions/EPlusPlus"
+        },
+        "e_minus_minus_body": {
+          "$ref": "#/definitions/EMinusMinus"
+        }
+      },
+      "description": "Any process may be an operand to an expression.\nOnly processes equivalent to a ground process of compatible type will reduce."
+    },
+    "GDeployerAuth": {
+      "type": "object",
+      "properties": {
+        "publicKey": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "GPrivate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "GUnforgeable": {
+      "type": "object",
+      "properties": {
+        "g_private_body": {
+          "$ref": "#/definitions/GPrivate"
+        },
+        "g_deployer_auth_body": {
+          "$ref": "#/definitions/GDeployerAuth"
+        }
+      },
+      "description": "Unforgeable names resulting from `new x { ... }`\nThese should only occur as the program is being evaluated. There is no way in\nthe grammar to construct them."
+    },
+    "KeyValuePair": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "$ref": "#/definitions/Par"
+        },
+        "value": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "Match": {
+      "type": "object",
+      "properties": {
+        "target": {
+          "$ref": "#/definitions/Par"
+        },
+        "cases": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MatchCase"
+          }
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "MatchCase": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "$ref": "#/definitions/Par"
+        },
+        "source": {
+          "$ref": "#/definitions/Par"
+        },
+        "freeCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "New": {
+      "type": "object",
+      "properties": {
+        "bindCount": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Includes any uris listed below. This makes it easier to substitute or walk a term."
+        },
+        "p": {
+          "$ref": "#/definitions/Par"
+        },
+        "uri": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "For normalization, uri-referenced variables come at the end, and in lexicographical order."
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        }
+      },
+      "description": "Number of variables bound in the new statement.\nFor normalized form, p should not contain solely another new.\nAlso for normalized form, the first use should be level+0, next use level+1\nup to level+count for the last used variable."
+    },
+    "Par": {
+      "type": "object",
+      "properties": {
+        "sends": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Send"
+          }
+        },
+        "receives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Receive"
+          }
+        },
+        "news": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/New"
+          }
+        },
+        "exprs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Expr"
+          }
+        },
+        "matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Match"
+          }
+        },
+        "unforgeables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/GUnforgeable"
+          }
+        },
+        "bundles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Bundle"
+          }
+        },
+        "connectives": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Connective"
+          }
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "For example, `@0!(1) | @2!(3) | for(x \u003c- @0) { Nil }` has two sends\nand one receive.\n\nThe Nil process is a `Par` with no sends, receives, etc.",
+      "title": "*\nRholang process"
+    },
+    "Receive": {
+      "type": "object",
+      "properties": {
+        "binds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ReceiveBind"
+          }
+        },
+        "body": {
+          "$ref": "#/definitions/Par"
+        },
+        "persistent": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "bindCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "*\nA receive is written `for(binds) { body }`\ni.e. `for(patterns \u003c- source) { body }`\nor for a persistent recieve: `for(patterns \u003c= source) { body }`.\n\nIt's an error for free Variable to occur more than once in a pattern."
+    },
+    "ReceiveBind": {
+      "type": "object",
+      "properties": {
+        "patterns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "source": {
+          "$ref": "#/definitions/Par"
+        },
+        "remainder": {
+          "$ref": "#/definitions/Var"
+        },
+        "freeCount": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "Send": {
+      "type": "object",
+      "properties": {
+        "chan": {
+          "$ref": "#/definitions/Par"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "persistent": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "locallyFree": {
+          "type": "string",
+          "format": "byte"
+        },
+        "connective_used": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "description": "*\nA send is written `chan!(data)` or `chan!!(data)` for a persistent send.\n\nUpon send, all free variables in data are substituted with their values."
+    },
+    "Var": {
+      "type": "object",
+      "properties": {
+        "bound_var": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "free_var": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "wildcard": {
+          "$ref": "#/definitions/VarWildcardMsg"
+        }
+      },
+      "title": "While we use vars in both positions, when producing the normalized\nrepresentation we need a discipline to track whether a var is a name or a\nprocess.\nThese are DeBruijn levels"
+    },
+    "VarRef": {
+      "type": "object",
+      "properties": {
+        "index": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "depth": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "VarWildcardMsg": {
+      "type": "object"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "protocolBlockInfo": {
+      "type": "object",
+      "properties": {
+        "blockHash": {
+          "type": "string"
+        },
+        "blockSize": {
+          "type": "string"
+        },
+        "blockNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "version": {
+          "type": "string",
+          "format": "int64"
+        },
+        "deployCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tupleSpaceHash": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "faultTolerance": {
+          "type": "number",
+          "format": "float"
+        },
+        "mainParentHash": {
+          "type": "string"
+        },
+        "parentsHashList": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sender": {
+          "type": "string"
+        },
+        "shardId": {
+          "type": "string"
+        },
+        "bondsValidatorList": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deployCost": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "For node clients, see BlockMessage for actual Casper protocol Block representation"
+    },
+    "protocolBlockQueryResponse": {
+      "type": "object",
+      "properties": {
+        "blockInfo": {
+          "$ref": "#/definitions/protocolBlockInfo"
+        }
+      }
+    },
+    "protocolContinuationAtNameQuery": {
+      "type": "object",
+      "properties": {
+        "depth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        }
+      }
+    },
+    "protocolContinuationsWithBlockInfo": {
+      "type": "object",
+      "properties": {
+        "postBlockContinuations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protocolWaitingContinuationInfo"
+          }
+        },
+        "block": {
+          "$ref": "#/definitions/protocolLightBlockInfo"
+        }
+      }
+    },
+    "protocolDataAtNameQuery": {
+      "type": "object",
+      "properties": {
+        "depth": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "name": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "protocolDataWithBlockInfo": {
+      "type": "object",
+      "properties": {
+        "postBlockData": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Par"
+          }
+        },
+        "block": {
+          "$ref": "#/definitions/protocolLightBlockInfo"
+        }
+      }
+    },
+    "protocolDeployData": {
+      "type": "object",
+      "properties": {
+        "deployer": {
+          "type": "string",
+          "format": "byte"
+        },
+        "term": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "sig": {
+          "type": "string",
+          "format": "byte"
+        },
+        "sigAlgorithm": {
+          "type": "string"
+        },
+        "phloPrice": {
+          "type": "string",
+          "format": "int64"
+        },
+        "phloLimit": {
+          "type": "string",
+          "format": "int64"
+        },
+        "validAfterBlockNumber": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "protocolDeployServiceResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "protocolLightBlockInfo": {
+      "type": "object",
+      "properties": {
+        "blockHash": {
+          "type": "string"
+        },
+        "blockSize": {
+          "type": "string"
+        },
+        "blockNumber": {
+          "type": "string",
+          "format": "int64"
+        },
+        "version": {
+          "type": "string",
+          "format": "int64"
+        },
+        "deployCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "tupleSpaceHash": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "int64"
+        },
+        "faultTolerance": {
+          "type": "number",
+          "format": "float"
+        },
+        "mainParentHash": {
+          "type": "string"
+        },
+        "parentsHashList": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sender": {
+          "type": "string"
+        }
+      }
+    },
+    "protocolLightBlockQueryResponse": {
+      "type": "object",
+      "properties": {
+        "blockInfo": {
+          "$ref": "#/definitions/protocolLightBlockInfo"
+        }
+      }
+    },
+    "protocolListeningNameContinuationResponse": {
+      "type": "object",
+      "properties": {
+        "blockResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protocolContinuationsWithBlockInfo"
+          }
+        },
+        "length": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "protocolListeningNameDataResponse": {
+      "type": "object",
+      "properties": {
+        "blockResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protocolDataWithBlockInfo"
+          }
+        },
+        "length": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "protocolWaitingContinuationInfo": {
+      "type": "object",
+      "properties": {
+        "postBlockPatterns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BindPattern"
+          }
+        },
+        "postBlockContinuation": {
+          "$ref": "#/definitions/Par"
+        }
+      }
+    },
+    "runtimeStreamError": {
+      "type": "object",
+      "properties": {
+        "grpc_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "http_code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "http_status": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  },
+  "x-stream-definitions": {
+    "protocolLightBlockInfo": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "$ref": "#/definitions/protocolLightBlockInfo"
+        },
+        "error": {
+          "$ref": "#/definitions/runtimeStreamError"
+        }
+      },
+      "title": "Stream result of protocolLightBlockInfo"
+    }
+  }
+}

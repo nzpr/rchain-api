@@ -1,0 +1,237 @@
+/**
+ * The main API is `DeployService`.
+ */
+syntax = "proto3";
+package coop.rchain.casper.protocol;
+
+// If you are building for other languages "scalapb.proto"
+// can be manually obtained here:
+// https://raw.githubusercontent.com/scalapb/ScalaPB/master/protobuf/scalapb/scalapb.proto
+// make a scalapb directory in this file's location and place it inside
+
+import "scalapb/scalapb.proto";
+import "RhoTypes.proto";
+
+option (scalapb.options) = {
+  package_name: "coop.rchain.casper.protocol"
+  flat_package: true
+  single_file: true
+};
+
+import "google/api/annotations.proto";
+
+// Use `DoDeploy` to queue deployments of Rholang code and then
+// `createBlock` to make a new block with the results of running them
+// all.
+//
+// To get results back, use `listenForDataAtName`.
+
+service DeployService {
+  // Queue deployment of Rholang code (or fail to parse).
+  // Returns on success DeployServiceResponse
+  rpc DoDeploy(DeployData) returns (DeployServiceResponse) {
+    option (google.api.http) = {
+      put: "/v0.9.7/dodeploy",
+      body: "*"
+    };
+  }
+  // Get details about a particular block.
+  // Returns on success BlockQueryResponse
+  rpc getBlock(BlockQuery) returns (BlockQueryResponse) {
+    option (google.api.http) = {
+      get: "/v0.9.7/getblock/{hash}"
+    };
+  }
+  // Get a summary of blocks on the blockchain.
+  // Returns on success LightBlockInfo
+  rpc getBlocks(BlocksQuery) returns (stream LightBlockInfo) {
+    option (google.api.http) = {
+      get: "/v0.9.7/getblocks/{depth}"
+    };
+  }
+  // Returns on success LightBlockInfo.
+  rpc showMainChain(BlocksQuery) returns (stream LightBlockInfo) {
+    option (google.api.http) = {
+      get: "/v0.9.7/showmainchain/{depth}"
+    };
+  }
+  // Find data sent to a name.
+  // Returns on success ListeningNameDataResponse
+  rpc listenForDataAtName(DataAtNameQuery) returns (ListeningNameDataResponse) {
+    option (google.api.http) = {
+      put: "/v0.9.7/dataatname",
+      body: "*"
+    };
+  }
+  // Find processes receiving on a name.
+  // Returns on success ListeningNameContinuationResponse
+  rpc listenForContinuationAtName(ContinuationAtNameQuery) returns (ListeningNameContinuationResponse) {
+    option (google.api.http) = {
+      put: "/v0.9.7/continuationatname",
+      body: "*"
+    };
+  }
+  // Find block from a deploy.
+  // Returns on success BlockQueryResponse
+  rpc findBlockWithDeploy(FindDeployInBlockQuery) returns (BlockQueryResponse) {
+    option (google.api.http) = {
+      get: "/v0.9.7/getblockwithdeploy/{user}/{timestamp}"
+    };
+  }
+  // Find block containing a deploy.
+  // Returns on success LightBlockQueryResponse
+  rpc findDeploy(FindDeployQuery) returns (LightBlockQueryResponse) {
+    option (google.api.http) = {
+      get: "/v0.9.7/getdeploy/{deployId}"
+    };
+  }
+  // Get details about a particular block.
+  // Returns on success BlockQueryResponse
+  rpc lastFinalizedBlock(LastFinalizedBlockQuery) returns (BlockQueryResponse) {
+    option (google.api.http) = {
+      get: "/v0.9.7/getfinalizedblock"
+    };
+  }
+}
+
+message FindDeployQuery {
+  bytes deployId = 1;
+}
+
+message FindDeployInBlockQuery {
+  bytes user = 1;
+  int64 timestamp = 2;
+}
+
+message BlockQuery {
+  string hash = 1;
+}
+
+message BlocksQuery {
+  int32 depth = 1;
+}
+
+message DataAtNameQuery {
+  int32 depth = 1;
+  Par name = 2;
+}
+
+message ContinuationAtNameQuery {
+  int32 depth = 1;
+  repeated Par names = 2;
+}
+
+message DeployServiceResponse {
+  string message = 1;
+}
+
+message BlockQueryResponse {
+  BlockInfo blockInfo = 1;
+}
+
+message LightBlockQueryResponse {
+  LightBlockInfo blockInfo = 1;
+}
+
+message VisualizeDagQuery {
+  int32 depth                 = 1;
+  bool showJustificationLines = 2;
+}
+
+message VisualizeBlocksResponse {
+  string content = 1;
+}
+
+message MachineVerifyQuery {
+
+}
+
+message MachineVerifyResponse {
+  string content = 1;
+}
+
+message ListeningNameDataResponse {
+  repeated DataWithBlockInfo blockResults = 1;
+  int32 length = 2;
+}
+
+message ListeningNameContinuationResponse {
+  repeated ContinuationsWithBlockInfo blockResults = 1;
+  int32 length = 2;
+}
+
+message PrivateNamePreviewQuery {
+  bytes  user         = 1; // public key a la DeployData
+  int64  timestamp    = 2; // millisecond timestamp
+  int32  nameQty      = 3; // how many names to preview? (max: 1024)
+}
+
+message PrivateNamePreviewResponse {
+  repeated bytes ids  = 1; // a la GPrivate
+}
+
+message LastFinalizedBlockQuery {
+
+}
+
+message LastFinalizedBlockResponse {
+  BlockInfo blockInfo = 1;
+}
+
+message LightBlockInfo {
+  string blockHash = 1;
+  string blockSize = 2;
+  int64 blockNumber = 3;
+  int64 version = 4;
+  int32 deployCount = 5;
+  string tupleSpaceHash = 6; // Same as postStateHash of BlockMessage
+  int64 timestamp = 7;
+  float faultTolerance = 8;
+  string mainParentHash = 9;
+  repeated string parentsHashList = 10;
+  string sender = 11;
+}
+
+// For node clients, see BlockMessage for actual Casper protocol Block representation
+message BlockInfo {
+  string blockHash = 1;
+  string blockSize = 2;
+  int64 blockNumber = 3;
+  int64 version = 4;
+  int32 deployCount = 5;
+  string tupleSpaceHash = 6; // Same as postStateHash of BlockMessage
+  int64 timestamp = 7;
+  float faultTolerance = 8;
+  string mainParentHash = 9;
+  repeated string parentsHashList = 10;
+  string sender = 11;
+  string shardId = 12;
+  repeated string bondsValidatorList = 13;
+  repeated string deployCost = 14;
+}
+
+message DataWithBlockInfo {
+  repeated Par postBlockData = 1;
+  LightBlockInfo block = 2;
+}
+
+message ContinuationsWithBlockInfo {
+  repeated WaitingContinuationInfo postBlockContinuations = 1;
+  LightBlockInfo block = 2;
+}
+
+message WaitingContinuationInfo {
+  repeated BindPattern postBlockPatterns = 1;
+  Par postBlockContinuation = 2;
+}
+
+message DeployData {
+  bytes  deployer     = 1; //public key
+  string term         = 2; //rholang source code to deploy (will be parsed into `Par`)
+  int64  timestamp    = 3; //millisecond timestamp
+  bytes  sig          = 4; //signature of (hash(term) + timestamp) using private key
+  string sigAlgorithm = 5; //name of the algorithm used to sign
+  int64 phloPrice     = 7; //phlo price
+  int64 phloLimit     = 8; //phlo limit for the deployment
+  int64 validAfterBlockNumber = 10;
+}
