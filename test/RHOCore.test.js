@@ -96,11 +96,13 @@ function testRHOCore() {
       const k1 = Ed25519keyPair(h2b('f6664a95992958bbfeb7e6f50bbca2aa7bfd015aec79820caf362a3c874e9247'));
 
       // BasicWallet.transfer signature is over these params:
-      const [nonce, amount, dest] = [12, 100, GPrivate.fromObject({ id: destid })];
+      const [nonce, amount, dest] = [12, 100, GUnforgeable.fromObject({
+        g_private_body: GPrivate.fromObject({ id: destid })
+      })];
       const sig = Hex.decode(RHOCore.wrapHash(k1.signBytes)([nonce, amount, dest]));
       test.equal(
         rhol`new dest, status in { BasicWallet!("transfer", ${amount}, ${nonce}, ${sig}, dest, status) }`,
-        'new dest, status in { BasicWallet!("transfer", 100, 12, "6a6e8ea7d13ad1e7cd676eee62081f9c6b36cfaef4d41d533127a56e7f48ad1378ae93e59b05d73cf17ce55bedf6b201cd78f6ec8ef20dd1b919b5918cc72007".hexToBytes(), dest, status) }',
+        'new dest, status in { BasicWallet!("transfer", 100, 12, "eb490b2ff2ea49a3730db8a8a5b911da61b83e1bdb48e94f29985c36c065298667987a08515843b8b2edba4e5dd92f9e8adcc2ab115241b7e168063c8002cd02".hexToBytes(), dest, status) }',
       );
       test.end();
     },
