@@ -1,7 +1,7 @@
 /*global require, exports*/
 // @flow
 
-const { GPrivate } = require('../protobuf/RhoTypes.js');
+const { GPrivate } = require('../protobuf/RhoTypes_pb.js');
 const { rhol, prettyPrivate } = require('./RHOCore');
 const { Block } = require('./rnodeAPI');
 
@@ -146,7 +146,7 @@ async function runRholang(
   label /*: string */ = '',
 ) /**/ {
   const { rnode } = opts;
-  const deployData = payFor({ term, timestamp });
+  const deployData = payFor( term );
   // console.log('runRholang', { deployData, note: 'placeholder term' });
   const deployResult = await rnode.doDeploy(deployData, true);
   console.log({ deployResult }); // ISSUE: return block hash to caller?

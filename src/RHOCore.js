@@ -5,7 +5,7 @@ const { URL } = require('url');
 
 const { Writer } = require('protobufjs');
 // ISSUE: generated code isn't annotated. $FlowFixMe
-const { Par, GPrivate, GUnforgeable, GDeployId, GDeployerId  } = require('../protobuf/RhoTypes');
+const { Par, GPrivate, GUnforgeable, GDeployId, GDeployerId  } = require('../protobuf/RhoTypes_pb');
 
 const hex = require('./hex');
 
@@ -21,23 +21,17 @@ exports.fromJSData = fromJSData;
  *
  * @param data: number, string, array, etc.; see toJSData for details.
  * @return: A rholang term in Protobuf's JSON representation,
- *          i.e. `IPar` derived from RhoTypes.proto.
+ *          i.e. `Par` derived from RhoTypes.proto.
  * @memberof RHOCore
  */
-function fromJSData(data /*: mixed */) /* : IPar */ {
+function fromJSData(data /*: mixed */) /* : Par */ {
 
-  // ISSUE: why doesn't x instanceof doesn't work on data passed into???
-  const GU = GUnforgeable.fromObject({ g_private_body: {id:'dead'} }).constructor;
-  const GP = GPrivate.fromObject({id:'dead'}).constructor;
-  const GD = GDeployId.fromObject({sig:'dead'}).constructor;
-  const GDr = GDeployerId.fromObject({publicKey:'dead'}).constructor;
-
-  function expr1(kv /*: IPar*/) { return { exprs: [kv] }; }
+  function expr1(kv /*: Par*/) { return { exprs: [kv] }; }
   function gPrivate(kv /*: GPrivate*/) { return { g_private_body: kv }; }
   function gDeployId(kv /*: GDeployId*/) { return { g_deploy_id_body: kv }; }
   function gDeployerId(kv /*: GDeployerId*/) { return { g_deployer_id_body: kv }; }
 
-  function recur(x) /*: IPar */{
+  function recur(x) /*: Par */{
     switch (typeof x) {
       case 'boolean':
         return expr1({ g_bool: x });
@@ -56,16 +50,16 @@ function fromJSData(data /*: mixed */) /* : IPar */ {
         if (x instanceof URL) {
           return expr1({ g_uri: x.href });
         }
-        if (x instanceof GU) {
+        if (x instanceof GUnforgeable) {
           return { unforgeables: [x] };
         }
-        if (x instanceof GP) {
+        if (x instanceof GPrivate) {
           return gPrivate(x);
         }
-        if (x instanceof GD) {
+        if (x instanceof GDeployId) {
           return gDeployId(x);
         }
-        if (x instanceof GDr) {
+        if (x instanceof GDeployerId) {
           return gDeployerId(x);
         }
         if (x instanceof Uint8Array) {
@@ -87,7 +81,7 @@ function fromJSData(data /*: mixed */) /* : IPar */ {
     return expr1({ e_list_body: { ps: items.map(recur) } });
   }
 
-  function keysValues(obj) /*: IPar */ {
+  function keysValues(obj) /*: Par */ {
     const kvs /*: ISend[] */ = Object.keys(obj).sort().map(
       k => ({ key: recur(k), value: recur(obj[k]) }),
     );
@@ -104,7 +98,7 @@ exports.fromIds = fromIds;
  * @async
  * @memberof RHOCore
  */
-async function fromIds(idsP /*: Promise<Buffer[]> */) /*: Promise<IPar[]> */ {
+async function fromIds(idsP /*: Promise<Buffer[]> */) /*: Promise<Par[]> */ {
   const ids = await idsP;
   return ids.map(id => ({ ids: [{ id }] }));
 }
@@ -115,7 +109,7 @@ exports.toByteArray = toByteArray;
  * Turns a rholang term into a byte-array compatible with Rholang
  * @memberof RHOCore
  */
-function toByteArray(termObj /*: IPar */) /*: Uint8Array */ {
+function toByteArray(termObj /*: Par */) /*: Uint8Array */ {
   // Par.verify(termObj);
   return Par.encode(termObj).finish();
 }
@@ -194,8 +188,8 @@ exports.toJSData = toJSData;
  * @param par A RHOCore representation of a Rholang term
  * @return JSON-serializable data
  */
-function toJSData(par /*: IPar */) /*: JsonExt<URL | GPrivate> */{
-  function recur(p /*: IPar */) /*: JsonExt<URL | GPrivate> */{
+function toJSData(par /*: Par */) /*: JsonExt<URL | GPrivate> */{
+  function recur(p /*: Par */) /*: JsonExt<URL | GPrivate> */{
     if (p.exprs && p.exprs.length > 0) {
       if (p.exprs.length > 1) {
         throw new Error(`${p.exprs.length} exprs not part of RHOCore`);
@@ -269,12 +263,12 @@ exports.toRholang = toRholang;
  * @param par A RHOCore representation of a Rholang term
  * @return A rholang string
  *
- * ISSUE: Use intersection types to constrain par param further than IPar?
+ * ISSUE: Use intersection types to constrain par param further than Par?
  */
-function toRholang(par /*: IPar */) /*: string */ {
+function toRholang(par /*: Par */) /*: string */ {
   const src = x => JSON.stringify(x);
 
-  function recur(p /*: IPar */) {
+  function recur(p /*: Par */) {
     if (p.unforgeables && p.unforgeables.length) {
       throw new Error('Unforgeable names have no rholang syntax.');
     } else if (p.exprs && p.exprs.length > 0) {
@@ -338,7 +332,7 @@ function unforgeableWithId(id /*: Uint8Array */) {
 }
 exports.unforgeableWithId = unforgeableWithId;
 
-function prettyPrivate(par /*: IPar */) /*: string */{
+function prettyPrivate(par /*: Par */) /*: string */{
   if (!(par.ids && par.ids.length && par.ids[0].id)) {
     return toRholang(par);
   }
@@ -356,7 +350,7 @@ exports.getIdFromUnforgeableName = getIdFromUnforgeableName;
  *
  * @memberof RHOCore
  */
-function getIdFromUnforgeableName(par /*: IPar */) /*: string */ {
+function getIdFromUnforgeableName(par /*: Par */) /*: string */ {
   if (par.ids && par.ids.length === 1 && par.ids[0].id) {
     return Buffer.from(par.ids[0].id).toString('hex');
   }

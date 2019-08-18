@@ -16,7 +16,7 @@ const { link } = require('./assets');
 const LOADER_TEMPLATE = link('./loader.rho');
 
 /*::
-import type { DeployInfo } from '../protobuf/CasperMessage';
+import type { DeployInfo } from '../protobuf/CasperMessage_pb';
 import type { IRNode } from '..';
 import type { PayFor } from './proxy';
 

@@ -5,7 +5,6 @@ const { URL } = require('url');
 const ttest = require('tape');
 
 const { RHOCore, Hex, Ed25519keyPair } = require('..');
-const { Par, GUnforgeable, GPrivate } = require('../protobuf/RhoTypes');
 
 const testData = require('./RHOCoreSuite.json');
 

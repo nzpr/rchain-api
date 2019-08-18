@@ -2,7 +2,7 @@
 // @flow
 
 const ttest = require('tape');
-const { DeployData } = require('../protobuf/CasperMessage').coop.rchain.casper.protocol;
+const { DeployData } = require('../protobuf/CasperMessage_pb').coop.rchain.casper.protocol;
 const { Ed25519keyPair, RholangCrypto, Hex, REV } = require('..');
 
 const { ed25519Verify } = RholangCrypto;

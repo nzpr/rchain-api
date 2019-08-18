@@ -69,6 +69,12 @@ function Ed25519keyPair(seed /*: PrivateKey */) {
      */
     publicKey() /*: HexStr<PublicKey> */ { return b2hx(key.publicKey); },
 
+     /**
+     *
+     * @memberof Ed25519keyPair
+     */
+    publicKey_asU8() /*: HexStr<PublicKey> */ { return key.publicKey; },
+
     // TODO label: () => state.label,
     // TODO [inspect.custom]: toString
   });

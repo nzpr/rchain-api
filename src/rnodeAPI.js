@@ -12,7 +12,10 @@ refs:
 // @flow strict
 
 const assert = require('assert');
-const protoLoader = require('@grpc/proto-loader');
+const jspb = require('google-protobuf')
+
+const { DeployServiceClient } = require('../protobuf/DeployService_grpc_pb');
+
 const {
   BlockQueryResponse,
   LightBlockInfo,
@@ -22,7 +25,14 @@ const {
   ListeningNameContinuationResponse,
   ListeningNameDataResponse,
   PrivateNamePreviewResponse,
-} = require('../protobuf/DeployService').coop.rchain.casper.protocol;
+  BlocksQuery,
+  BlockQuery,
+  DataAtNameQuery
+} = require('../protobuf/DeployService_pb');
+
+const { ProposeServiceClient } = require('../protobuf/ProposeService_grpc_pb');
+const { PrintUnmatchedSendsQuery } = require('../protobuf/ProposeService_pb');
+
 const RHOCore = require('./RHOCore');
 const Hex = require('./hex');
 const { RholangCrypto } = require('./signing');
@@ -30,19 +40,6 @@ const { RholangCrypto } = require('./signing');
 const { blake2b256Hash, ed25519Verify } = RholangCrypto;
 
 const def = obj => Object.freeze(obj); // cf. ocap design note
-
-// Options for similarity to grpc.load behavior
-// https://grpc.io/docs/tutorials/basic/node.html#loading-service-descriptors-from-proto-files
-const likeLoad = { keepCase: true, longs: String, enums: String, defaults: true, oneofs: true };
-const deployServiceDefinition = protoLoader.loadSync(
-  __dirname + '/../protobuf/DeployService.proto', // eslint-disable-line
-  likeLoad,
-);
-const proposeServiceDefinition = protoLoader.loadSync(
-  __dirname + '/../protobuf/ProposeService.proto', // eslint-disable-line
-  likeLoad,
-);
-
 
 /*::
 import type { JsonExt } from './RHOCore';
@@ -115,13 +112,11 @@ function RNode(
   assert.ok(host, 'endPoint.host missing');
   assert.ok(port, 'endPoint.port missing');
 
-  const deployProto = grpc.loadPackageDefinition(deployServiceDefinition);
-  const client /*: DeployService */ = new deployProto.coop.rchain.casper.protocol.DeployService(
+  const client /*: DeployServiceClient */ = new DeployServiceClient(
     `${host}:${port}`, grpc.credentials.createInsecure(), // ISSUE: let caller do secure?
   );
 
-  const proposeProto = grpc.loadPackageDefinition(proposeServiceDefinition);
-  const proposeClient /*: ProposeService */ = new proposeProto.coop.rchain.casper.protocol.ProposeService(
+  const proposeClient /*: ProposeServiceClient */ = new ProposeServiceClient(
     `${host}:${port}`, grpc.credentials.createInsecure(),  // ISSUE: let caller do secure?
   );
 
@@ -170,46 +165,48 @@ function RNode(
    * @throws {Error} Could not deploy, casper instance was not available yet.
    * @throws {Error} Missing / invalid / wrong size signature
    */
-  async function doDeploy(deployData /*: IDeployData */,
+  async function doDeploy(deployData /*: DeployData */,
     autoCreateBlock /*: boolean*/ = false) /*: Promise<string>*/ {
     // See also
     // casper/src/main/scala/coop/rchain/casper/util/comm/DeployRuntime.scala#L38
     // d        = DeployString().withTimestamp(timestamp).withTerm(code)
-    if (!Number.isInteger(deployData.phloLimit)) {
+
+    if (!Number.isInteger(deployData.getPhlolimit())) {
       throw new Error('ERROR: DeployData structure requires "phloLimit" to be specified');
     }
-    if (!Number.isInteger(deployData.phloPrice)) {
+    if (!Number.isInteger(deployData.getPhloprice())) {
       throw new Error('ERROR: DeployData structure requires "phloPrice" to be specified');
     }
-    let out = await either(DeployServiceResponse, send(f => client.doDeploy(deployData, f)));
+    let out = await either(send(f => client.doDeploy(deployData, f)));
     if (autoCreateBlock) {
-      out = await either(DeployServiceResponse, send(f => proposeClient.propose({}, f)));
+      out = await createBlock(false);
     }
-    return out.message;
+    return DeployServiceResponse.deserializeBinary(out).getMessage();
   }
 
   /**
    * Creates a block on your node
    * @memberof RNode
-   * @instance
+   * @instanc
    * @return A promise for response message
    */
-  async function createBlock() /*: Promise<string>*/ {
-    const r = await either(DeployServiceResponse, send(f => proposeClient.propose({}, f)));
-    return r.message;
+  async function createBlock(printUnmatchedSends /*: boolean */) /*: Promise<string>*/ {
+    const q = new PrintUnmatchedSendsQuery(printUnmatchedSends);
+    const r = await either(send(f => proposeClient.propose(q, f)));
+    return r;
   }
 
-  async function either/*::<T>*/(cls /*: Decoder<T>*/, px /*: Promise<Either>*/) /*: Promise<T>*/{
+  async function either/*::<T>*/(px /*: Promise<Either>*/) /*: Promise<T>*/{
     const x = await px;
-    return eitherSync(cls, x);
+    return eitherSync(x);
   }
 
-  function eitherSync/*::<T>*/(cls /*: Decoder<T>*/, x /*: IEither*/) /*: T*/{
-    if (x.success) {
+  function eitherSync/*::<T>*/(x /*: Either*/) /*: T*/{
+    if (x.hasSuccess()) {
       /* $FlowFixMe$ ISSUE: Either.proto fibs a bit*/
-      return cls.decode(x.success.response.value);
+      return x.getSuccess().getResponse().getValue();
     }
-    throw new Error((x.error || {}).messages);
+    throw new Error(x.getError().getMessagesList());
   }
 
   /**
@@ -258,21 +255,20 @@ function RNode(
    * @throws Error if status is not Success
    */
   async function listenForDataAtName(
-    par /*: IPar */,
+    par /*: Par */,
     depth /*: number */ = 1,
   ) /*: Promise<DataWithBlockInfo[]> */ {
     // console.log('listen', { par: JSON.stringify(par) });
-    const channelRequest = {
-      depth,
-      name: par,
-    };
-    const _ = DataWithBlockInfo; // mark used
+    const q = new DataAtNameQuery();
+    q.setDepth(depth);
+    q.setName(par);
+    //const _ = DataWithBlockInfo; // mark used
     const response = await either(
-      ListeningNameDataResponse,
       send(f => client.listenForDataAtName(channelRequest, f)),
     );
+    ;
     // console.log('listen', { response });
-    return response.blockResults;
+    return ListeningNameDataResponse.deserializeBinary(response).getBlockResults();
   }
 
 
@@ -319,7 +315,7 @@ function RNode(
    * @throws Error if status is not Success
    */
   async function listenForContinuationAtName(
-    pars /*: IPar[] */,
+    pars /*: Par[] */,
     depth /*: number */,
   ) /*: Promise<ListeningNameContinuationResponse> */{
     const channelRequest = {
@@ -344,11 +340,10 @@ function RNode(
     if (blockHash.trim().length === 0 || blockHash === null || blockHash === undefined) { throw new Error('ERROR: blockHash is blank'); }
     if (typeof blockHash !== 'string') { throw new Error('ERROR: blockHash must be a string value'); }
 
-    const response = await either(
-      BlockQueryResponse,
-      send(f => client.getBlock({ hash: blockHash }, f)),
-    );
-    return response.blockInfo;
+    const q = new BlockQuery();
+    q.setHash(blockHash);
+    const response = await either(send(f => client.getBlock(q, f)));
+    return BlockQueryResponse.deserializeBinary(response).getBlockInfo();
   }
 
   /**
@@ -361,15 +356,17 @@ function RNode(
    * @return List of LightBlockInfo structures for each block retrieved
    * @throws Error if blockDepth < 1 or no blocks were able to be retrieved
    */
-  function getBlocks(blockDepth /*: number */ = 1) /*: Promise<LightBlockInfo> */{
+  function getBlocks(blockDepth /*: number */ = 1) /*: Promise<Array <LightBlockInfo>> */{
     if (!Number.isInteger(blockDepth)) { throw new Error('ERROR: blockDepth must be an integer'); }
     if (blockDepth < 1) { throw new Error('ERROR: blockDepth parameter must be >= 1'); }
-    return sendThenReceiveStream(client.getBlocks({ depth: blockDepth }))
+    const q = new BlocksQuery();
+    q.setDepth(blockDepth);
+    return sendThenReceiveStream(client.getBlocks(q))
       .then((parts) => {
         if (parts.length === 0) {
           throw new Error('ERROR: Failed to retrieve the requested blocks');
         }
-        return parts.map(x => eitherSync(LightBlockInfo, x));
+        return parts.map(x => LightBlockInfo.deserializeBinary(eitherSync(x)));
       });
   }
 
@@ -434,24 +431,42 @@ const SignDeployment = (() => {
   /**
    * @memberof REV.SignDeployment
    */
-  function sign(key /*: KeyPair */, deployData /*: DeployData*/)/*: DeployData*/ {
-    const toSign = DeployData.encode(clear(deployData)).finish();
+  function sign(key /*: KeyPair */, deployData /*: DeployData*/) /*:
+   DeployData*/ {
+    deployData.setTimestamp((new Date()).valueOf());
+    deployData.setDeployer(null);
+    deployData.setSig(null);
+    deployData.setSigalgorithm(null);
+    deployData.setPhloprice(1);
+    deployData.setPhlolimit(10000000);
+    deployData.setValidafterblocknumber(0);
+
+    const toSign = deployData.serializeBinary();
     const hash = blake2b256Hash(toSign);
     const signature = key.signBytes(hash);
 
-    return fill(deployData)(Hex.decode(key.publicKey()), signature, algName);
+    deployData.setSig(signature);
+    deployData.setDeployer(key.publicKey_asU8());
+    deployData.setSigalgorithm(algName);
+    
+    return deployData;
   }
 
   /**
    * @memberof REV.SignDeployment
    */
   function verify(deployData /*: DeployData*/)/*: boolean */ {
-    if (deployData.sigAlgorithm !== algName) {
-      throw new Error(`unsupported: ${deployData.sigAlgorithm}`);
+    if (deployData.getSigalgorithm() !== algName) {
+      throw new Error(`unsupported: ${deployData.getSigalgorithm()}`);
     }
-    const toVerify = DeployData.encode(clear(deployData)).finish();
+    const sig = deployData.getSig_asU8();
+    const deployer = deployData.getDeployer_asU8();
+    deployData.setDeployer(null);
+    deployData.setSig(null);
+    deployData.setSigalgorithm(null);
+    const toVerify = deployData.serializeBinary();
     const hash = blake2b256Hash(toVerify);
-    return ed25519Verify(hash, deployData.sig, deployData.deployer);
+    return ed25519Verify(hash, sig, deployer);
   }
 
   return Object.freeze({ sign, verify });

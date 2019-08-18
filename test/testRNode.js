@@ -2,12 +2,13 @@
 // @flow
 
 const ttest = require('tape');
-const { LightBlockInfo } = require('../protobuf/DeployService').coop.rchain.casper.protocol;
 
 const api = require('..');
 
 const { RNode, RegistryProxy, REV, RHOCore, Hex } = api;
 const { RholangCrypto, Ed25519keyPair } = api;
+
+const { DeployData, LightBlockInfo } = require('../protobuf/DeployService_pb');
 
 const { sha256Hash, keccak256Hash, blake2b256Hash } = RholangCrypto;
 
@@ -20,18 +21,19 @@ import type { JsonExt } from '..';
  *
  * @param suite2: supplemental tests
  */
-function testRNode(suite2) {
-  const grpc0 = grpcMock();
 
+
+function testRNode(suite2) {
   Object.entries({
     'args check': (test) => {
-      test.doesNotThrow(() => RNode(grpc0, { host: 'h', port: 123 }));
+      const grpc = require('grpc');
+      test.doesNotThrow(() => RNode(grpc, { host: 'h', port: 123 }));
       // $FlowFixMe args are intentionally wrong type
-      test.throws(() => RNode(grpc0, null), Error);
+      test.throws(() => RNode(grpc, null), Error);
       // $FlowFixMe
-      test.throws(() => RNode(grpc0, { host: 'hi' }), Error);
+      test.throws(() => RNode(grpc, { host: 'hi' }), Error);
       // $FlowFixMe
-      test.throws(() => RNode(grpc0, { port: 123 }), Error);
+      test.throws(() => RNode(grpc, { port: 123 }), Error);
       test.end();
     },
     ...suite2,
@@ -72,25 +74,22 @@ function netTests({ grpc, clock, rng }) {
   return {
     'smart contract deploy': (test) => {
       const term = 'new test in { contract test(return) = { return!("test") } }';
-      const timestamp = clock().valueOf();
 
       const key = Ed25519keyPair(defaultSec);
-      localNode().doDeploy(payFor({ term, timestamp }, key), true).then((results) => {
+      localNode().doDeploy(payFor(term, key), true).then((results) => {
         test.equal(results.slice(0, 'Success'.length), 'Success');
         test.end();
       })
-        .catch((oops) => { test.fail(oops.message); test.end(); });
+        .catch((oops) => { 
+          test.fail(oops.message); test.end(); 
+        });
     },
     'test getBlocks': (test) => {
-      const expected = [
-        'parentsHashList', 'blockHash', 'blockSize', 'blockNumber', 'version',
-        'deployCount', 'tupleSpaceHash', 'timestamp', 'faultTolerance',
-        'mainParentHash', 'sender',
-      ];
+      const expected =  Object.keys((new LightBlockInfo()).toObject());
       localNode().getBlocks()
         .then((actual) => {
           test.equal(actual.length > 0, true);
-          test.deepEqual(Object.keys(actual[0]), expected);
+          test.deepEqual(Object.keys(actual[0].toObject()), expected);
           test.end();
         })
         .catch((oops) => { test.fail(oops.message); test.end(); });
@@ -140,47 +139,16 @@ async function runAndListen(
 
 
 function payFor(d0, key, phloPrice = 1, phloLimit = 10000000) {
-  const dout = REV.SignDeployment.sign(key, {
-    ...d0,
-    phloPrice,
-    phloLimit,
-  });
-  // console.log({ valid: SignDeployment.verify(dout), sig: b2h(dout.sig) });
+  const toSign = new DeployData();
+  toSign.setTerm(d0);
+  
+  const dout = REV.SignDeployment.sign(key, toSign);
+  dout.setPhloprice(phloPrice);
+  dout.setPhlolimit(phloLimit);
+
+  //console.log({ valid: REV.SignDeployment.verify(dout), sig: dout.sig });
   return dout;
 }
-
-exports.grpcMock = grpcMock;
-function grpcMock() {
-  function DeployService(_hostPort /*: Object */, _chan /*: Object */) {
-    return Object.freeze({
-      doDeploy(_dd /*: Object */, _auto /*: boolean */ = false) { return 'Success!'; },
-      getBlocks(_depth /*: number */) {
-        const block4 = {
-          value: LightBlockInfo
-            .encode({ blockHash: 'deadbeef' }).finish(),
-        };
-
-        return Object.freeze({
-          on(name /*: string */, handler /*: (...args: any[]) => void */) {
-            if (name === 'data') {
-              handler({ success: { response: block4 } });
-            } else if (name === 'end') {
-              handler();
-            }
-          },
-        });
-      },
-    });
-  }
-
-  const casper = { DeployService };
-  const proto = { coop: { rchain: { casper: { protocol: casper } } } };
-  return Object.freeze({
-    loadPackageDefinition(_d /*: Object */) { return proto; },
-    credentials: { createInsecure() { } },
-  });
-}
-
 
 if (require.main === module) {
   // Access ambient stuff only when invoked as main module.

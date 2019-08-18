@@ -46,7 +46,6 @@
   },
   "homepage": "https://github.com/rchain-community/RChain-API#readme",
   "dependencies": {
-    "@grpc/proto-loader": "^0.3.0",
     "blake2": "^2.0.1",
     "bs58": "^4.0.1",
     "grpc": "^1.13.1",
@@ -61,8 +60,12 @@
     "eslint-config-airbnb-base": "^13.0.0",
     "eslint-plugin-import": "^2.13.0",
     "flow-bin": "^0.81.0",
+    "flowgen": "^1.10.0",
+    "grpc-tools": "^1.8.0",
+    "grpc_tools_node_protoc_ts": "^2.5.4",
     "markdown-doctest": "^0.9.1",
-    "tape": "^4.10.1"
+    "tape": "^4.10.1",
+    "ts-protoc-gen": "^0.10.0"
   },
   "TODO": {
     "documentation": "^8.0.2"

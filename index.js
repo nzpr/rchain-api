@@ -53,7 +53,7 @@ export type JsonExt<T> = JsonExt<T>;
  */
 
 exports.RHOCore = RHOCore;
-exports.RhoTypes = require('./protobuf/RhoTypes');
+exports.RhoTypes = require('./protobuf/RhoTypes_pb');
 
 
 const { RNode, SignDeployment, Block } = require('./src/rnodeAPI');
